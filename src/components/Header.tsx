@@ -15,19 +15,17 @@ const Header: React.FC = () => {
       }}>
         <div style={{
           display: 'flex',
-          justifyContent: 'space-between',
+          flexDirection: 'column',
           alignItems: 'center',
-          flexWrap: 'wrap',
+          textAlign: 'center',
           gap: '1rem'
         }}>
-          {/* Left side - Logo and text */}
+          {/* Main text content */}
           <div style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            textAlign: 'center',
-            flex: '1',
-            minWidth: '250px'
+            textAlign: 'center'
           }}>
             <h1 style={{
               fontFamily: "'Poppins', sans-serif",
@@ -53,26 +51,26 @@ const Header: React.FC = () => {
               fontSize: '0.875rem',
               color: '#0E2A47',
               fontWeight: '500',
-              fontFamily: "'Poppins', sans-serif"
+              fontFamily: "'Poppins', sans-serif",
+              marginBottom: '1rem'
             }}>
               mymaktab.co.uk
             </div>
           </div>
 
-          {/* Right side - Quranic Calligraphy Image */}
+          {/* Centered Quranic Calligraphy Image */}
           <div style={{
             display: 'flex',
             justifyContent: 'center',
-            alignItems: 'center',
-            flex: '0 0 auto'
+            alignItems: 'center'
           }}>
             <img
               src="https://img.freepik.com/premium-vector/rabbi-zidni-ilma-quranic-calligraphy-quran-verse-my-lord-increase-me-knowledge_761928-168.jpg"
               alt="Rabbi Zidni Ilma - Quranic Calligraphy"
               style={{
-                height: '80px',
+                height: '120px',
                 width: 'auto',
-                maxWidth: '200px',
+                maxWidth: '300px',
                 objectFit: 'contain',
                 borderRadius: '8px',
                 boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'

@@ -9,6 +9,8 @@ import {
 import SurahSelector from '../components/SurahSelector';
 import RuleCard from '../components/RuleCard';
 import ScoreDisplay from '../components/ScoreDisplay';
+import StudentInput from '../components/StudentInput';
+import SubmissionForm from '../components/SubmissionForm';
 import MakhrajSection from '../components/MakhrajSection';
 import MaddMistakesSection from '../components/MaddMistakesSection';
 import WaqfIbtidaaSection from '../components/WaqfIbtidaaSection';
@@ -72,7 +74,10 @@ const AssessmentPage: React.FC = () => {
           gridTemplateColumns: '1fr',
           gap: '2rem'
         }}>
-          {/* Top Row - Surah Selection and Score */}
+          {/* Top Row - Student Input */}
+          <StudentInput />
+
+          {/* Second Row - Surah Selection and Score */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
@@ -168,6 +173,9 @@ const AssessmentPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Submission Form */}
+        <SubmissionForm />
 
         {/* Instructions */}
         <div style={{

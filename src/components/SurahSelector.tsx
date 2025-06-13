@@ -129,13 +129,17 @@ const SurahSelector: React.FC = () => {
                 }}>
                   {getTierLabel(selectedSurah.tier)}
                 </span>
-                <div style={{ textAlign: 'left' }}>
-                  <div style={{
-                    fontWeight: '500',
-                    color: '#111827'
-                  }}>
-                    {selectedSurah.number}. {selectedSurah.name}
-                  </div>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{
+                      fontWeight: '500',
+                      color: '#111827',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem'
+                    }}>
+                      <span>{selectedSurah.number}.</span>
+                      <span className="surah-arabic-name">{selectedSurah.name}</span>
+                    </div>
                   <div style={{
                     fontSize: '0.875rem',
                     color: '#6b7280'
@@ -206,9 +210,13 @@ const SurahSelector: React.FC = () => {
                       <div>
                         <div style={{
                           fontWeight: '500',
-                          color: '#111827'
+                          color: '#111827',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem'
                         }}>
-                          {surah.number}. {surah.name}
+                          <span>{surah.number}.</span>
+                          <span className="surah-arabic-name">{surah.name}</span>
                         </div>
                         <div style={{
                           fontSize: '0.875rem',

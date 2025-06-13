@@ -67,6 +67,10 @@ export interface CategoryScores {
 }
 
 interface AssessmentContextType {
+  studentName: string;
+  setStudentName: (name: string) => void;
+  examinerComments: string;
+  setExaminerComments: (comments: string) => void;
   selectedSurah: Surah | null;
   setSelectedSurah: (surah: Surah | null) => void;
   mistakes: MistakeCount;
@@ -117,6 +121,8 @@ interface AssessmentProviderProps {
 }
 
 export const AssessmentProvider: React.FC<AssessmentProviderProps> = ({ children }) => {
+  const [studentName, setStudentName] = useState<string>('');
+  const [examinerComments, setExaminerComments] = useState<string>('');
   const [selectedSurah, setSelectedSurah] = useState<Surah | null>(null);
   const [mistakes, setMistakes] = useState<MistakeCount>({
     ghunna: 0,
@@ -368,6 +374,10 @@ export const AssessmentProvider: React.FC<AssessmentProviderProps> = ({ children
   };
 
   const value: AssessmentContextType = {
+    studentName,
+    setStudentName,
+    examinerComments,
+    setExaminerComments,
     selectedSurah,
     setSelectedSurah,
     mistakes,
