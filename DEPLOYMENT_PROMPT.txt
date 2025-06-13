@@ -1,0 +1,96 @@
+DEPLOYMENT PROMPT FOR CHATLLM DEEPAGENT
+
+Task: Deploy Tajweed Assessment React Application
+
+Application Overview:
+This is a React + TypeScript application for Quran Tajweed assessment. The app allows users to evaluate Quranic recitation based on various criteria including Makhraj (pronunciation), Madd mistakes, major/minor mistakes, and Waqf Ibtidaa rules.
+
+Technical Stack:
+- React 19.1.0 with TypeScript
+- React Router DOM for navigation
+- FontAwesome icons
+- Tailwind CSS (implied from build files)
+- Create React App framework
+
+Project Structure:
+- Frontend: React SPA with components for assessment forms
+- Build: Production-ready build files already generated in /build directory
+- Configuration: Standard CRA setup with TypeScript
+
+Deployment Instructions:
+
+1. SETUP ENVIRONMENT:
+   - Ensure Node.js 16+ is installed
+   - Clone or download the project files
+   - Navigate to project directory
+
+2. INSTALL DEPENDENCIES:
+   ```bash
+   npm install
+   ```
+
+3. BUILD APPLICATION (if needed):
+   ```bash
+   npm run build
+   ```
+   Note: Build files already exist in /build directory
+
+4. DEPLOYMENT OPTIONS:
+
+   Option A - Static Hosting (Recommended):
+   - Deploy the /build folder to any static hosting service
+   - Services: Netlify, Vercel, GitHub Pages, AWS S3, etc.
+   - Simply upload the contents of /build directory
+
+   Option B - Local Server:
+   ```bash
+   npm start
+   ```
+   Access at http://localhost:3000
+
+   Option C - Production Server:
+   - Use serve package: `npx serve -s build`
+   - Or configure nginx/apache to serve static files
+
+5. ENVIRONMENT CONFIGURATION:
+   - No environment variables required
+   - App runs entirely client-side
+   - Surah data loaded from public/surahs.json
+
+6. VERIFICATION:
+   - App should load with header "Tajweed Assessment"
+   - Surah selector dropdown should be functional
+   - Assessment form sections should be interactive
+   - Score calculation should work properly
+
+Key Features to Test:
+- Surah selection from dropdown
+- Student information input
+- Assessment criteria scoring (Makhraj, Madd, Major/Minor mistakes, Waqf Ibtidaa)
+- Score calculation and display
+- Form submission functionality
+
+Files Structure:
+- /src: Source code (React components, contexts, pages)
+- /public: Static assets including surahs.json data
+- /build: Production build (ready for deployment)
+- package.json: Dependencies and scripts
+
+Dependencies Summary:
+- React ecosystem (react, react-dom, react-router-dom)
+- TypeScript support
+- FontAwesome icons
+- Testing libraries
+- Build tools (react-scripts)
+
+Deployment Notes:
+- Application is a Single Page Application (SPA)
+- Requires proper routing configuration for production
+- All assets are bundled and optimized in /build directory
+- No backend server required - purely frontend application
+
+For any issues, check:
+1. Node.js version compatibility
+2. npm install completed successfully
+3. Build directory contains all necessary files
+4. Static file serving is properly configured
