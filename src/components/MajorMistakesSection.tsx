@@ -1,0 +1,222 @@
+
+import React from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCheck, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
+import { useAssessment } from '../contexts/AssessmentContext';
+
+const MajorMistakesSection: React.FC = () => {
+  const { 
+    selectedSurah, 
+    checklistMistakes, 
+    toggleChecklistMistake, 
+    calculateMajorDeduction,
+    getRAGStatus 
+  } = useAssessment();
+
+  const majorMistakes = [
+    {
+      key: 'skippedAyah',
+      title: 'Skipped ayah/words',
+      description: 'Omitted verses or significant portions'
+    },
+    {
+      key: 'repeatedBreakdown',
+      title: 'Repeated breakdown in Tajweed',
+      description: 'Multiple consecutive rule violations'
+    },
+    {
+      key: 'fluencyIssues',
+      title: 'Frequent major fluency issues',
+      description: 'Consistent hesitation or flow problems'
+    },
+    {
+      key: 'severeMispronunciation',
+      title: 'Severe mispronunciation',
+      description: 'Fundamental letter/word errors'
+    },
+  ];
+
+  if (!selectedSurah) {
+    return (
+      <div style={{
+        backgroundColor: 'white',
+        borderRadius: '0.5rem',
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+        border: '1px solid #e5e7eb',
+        padding: '1.5rem'
+      }}>
+        <div style={{ textAlign: 'center', color: '#6b7280' }}>
+          <FontAwesomeIcon icon={faExclamationCircle} style={{ fontSize: '2rem', marginBottom: '0.5rem' }} />
+          <div style={{ fontWeight: '500' }}>Major Mistakes</div>
+          <div style={{ fontSize: '0.875rem' }}>Select a Surah to begin</div>
+        </div>
+      </div>
+    );
+  }
+
+  const deduction = calculateMajorDeduction();
+  const ragStatus = getRAGStatus(100 - deduction);
+
+  const getRAGColor = (status: string) => {
+    switch (status) {
+      case 'green': return { color: '#16a34a', backgroundColor: '#f0fdf4', borderColor: '#bbf7d0' };
+      case 'amber': return { color: '#d97706', backgroundColor: '#fffbeb', borderColor: '#fde68a' };
+      case 'red': return { color: '#dc2626', backgroundColor: '#fef2f2', borderColor: '#fecaca' };
+      default: return { color: '#6b7280', backgroundColor: '#f9fafb', borderColor: '#e5e7eb' };
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'green': return '#22c55e';
+      case 'amber': return '#f59e0b';
+      case 'red': return '#ef4444';
+      default: return '#6b7280';
+    }
+  };
+
+  const ragColors = getRAGColor(ragStatus);
+
+  return (
+    <div style={{
+      backgroundColor: 'white',
+      borderRadius: '0.5rem',
+      boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+      border: `2px solid ${ragColors.borderColor}`,
+      transition: 'all 0.2s'
+    }}>
+      <div style={{ padding: '1.5rem' }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '1.5rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <FontAwesomeIcon icon={faExclamationCircle} style={{ fontSize: '1.5rem', color: '#ef4444' }} />
+            <div>
+              <h3 style={{
+                fontSize: '1.125rem',
+                fontWeight: '600',
+                color: '#111827',
+                margin: 0
+              }}>Major Mistakes</h3>
+              <p style={{
+                fontSize: '0.875rem',
+                color: '#6b7280',
+                margin: 0
+              }}>Serious errors (5% each, max 20%)</p>
+            </div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{
+              fontSize: '2rem',
+              fontWeight: 'bold',
+              color: getStatusIcon(ragStatus)
+            }}>
+              -{deduction}%
+            </div>
+            <div style={{
+              fontSize: '0.875rem',
+              color: '#6b7280'
+            }}>Deduction</div>
+          </div>
+        </div>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr',
+          gap: '0.75rem'
+        }}>
+          {majorMistakes.map((mistake) => {
+            const isChecked = checklistMistakes.majorMistakes[mistake.key as keyof typeof checklistMistakes.majorMistakes];
+            
+            return (
+              <div
+                key={mistake.key}
+                onClick={() => toggleChecklistMistake('majorMistakes', mistake.key)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  padding: '0.75rem',
+                  backgroundColor: isChecked ? '#fee2e2' : '#f9fafb',
+                  borderRadius: '0.5rem',
+                  border: `1px solid ${isChecked ? '#ef4444' : '#e5e7eb'}`,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isChecked) e.currentTarget.style.backgroundColor = '#f3f4f6';
+                }}
+                onMouseLeave={(e) => {
+                  if (!isChecked) e.currentTarget.style.backgroundColor = '#f9fafb';
+                }}
+              >
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '1.5rem',
+                  height: '1.5rem',
+                  backgroundColor: isChecked ? '#ef4444' : 'white',
+                  border: `2px solid ${isChecked ? '#ef4444' : '#d1d5db'}`,
+                  borderRadius: '0.25rem',
+                  transition: 'all 0.2s'
+                }}>
+                  {isChecked && (
+                    <FontAwesomeIcon 
+                      icon={faCheck} 
+                      style={{ 
+                        fontSize: '0.75rem', 
+                        color: 'white' 
+                      }} 
+                    />
+                  )}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{
+                    fontWeight: '500',
+                    color: '#111827',
+                    fontSize: '0.875rem'
+                  }}>{mistake.title}</div>
+                  <div style={{
+                    fontSize: '0.75rem',
+                    color: '#6b7280'
+                  }}>{mistake.description}</div>
+                </div>
+                <div style={{
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  color: isChecked ? '#dc2626' : '#6b7280'
+                }}>
+                  -5%
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div style={{
+          marginTop: '1rem',
+          width: '100%',
+          backgroundColor: '#e5e7eb',
+          borderRadius: '9999px',
+          height: '0.5rem'
+        }}>
+          <div
+            style={{
+              height: '0.5rem',
+              borderRadius: '9999px',
+              width: `${Math.max(0, 100 - deduction)}%`,
+              backgroundColor: getStatusIcon(ragStatus),
+              transition: 'all 0.3s'
+            }}
+          ></div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default MajorMistakesSection;
