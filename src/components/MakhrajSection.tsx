@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faMinus, faComment, faHeart } from '@fortawesome/free-solid-svg-icons';
@@ -17,7 +16,7 @@ const MakhrajSection: React.FC = () => {
   const makhrajTypes = [
     {
       type: 'nasal' as keyof MakhrajCount,
-      title: 'Nasal Passage',
+      title: 'Full Mouth Letters, خُصَّ –  ضَغْطٍ  –  قِظْ',
       description: 'ن، م',
       icon: faComment,
     },
@@ -35,13 +34,13 @@ const MakhrajSection: React.FC = () => {
     },
     {
       type: 'throat' as keyof MakhrajCount,
-      title: 'Throat',
+      title: 'Throat, ء ه ع غ ح خ',
       description: 'ع، ح، خ، غ',
       icon: faComment,
     },
     {
       type: 'chest' as keyof MakhrajCount,
-      title: 'Chest',
+      title: 'Fluency',
       description: 'ا، و، ي (long vowels)',
       icon: faHeart,
     },

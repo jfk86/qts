@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck, faPause } from '@fortawesome/free-solid-svg-icons';
@@ -29,11 +28,7 @@ const WaqfIbtidaaSection: React.FC = () => {
       title: 'Restarted incorrectly',
       description: 'Wrong word or pronunciation after pause'
     },
-    {
-      key: 'meaningConfusion',
-      title: 'Meaning confusion',
-      description: 'Stop/start affected verse meaning'
-    },
+
   ];
 
   if (!selectedSurah) {

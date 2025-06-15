@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
@@ -16,7 +15,7 @@ const MajorMistakesSection: React.FC = () => {
   const majorMistakes = [
     {
       key: 'skippedAyah',
-      title: 'Skipped ayah/words',
+      title: 'Skipped Shaddah',
       description: 'Omitted verses or significant portions'
     },
     {

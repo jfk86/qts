@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
@@ -14,11 +13,7 @@ const MinorMistakesSection: React.FC = () => {
   } = useAssessment();
 
   const minorMistakes = [
-    {
-      key: 'skippedShaddah',
-      title: 'Skipped Shaddah',
-      description: 'Failed to emphasize doubled letters'
-    },
+
     {
       key: 'misreadSukun',
       title: 'Misread Sukun',
@@ -29,11 +24,7 @@ const MinorMistakesSection: React.FC = () => {
       title: 'Incorrect sound',
       description: 'e.g., س vs ص confusion'
     },
-    {
-      key: 'nasalisationError',
-      title: 'Nasalisation error',
-      description: 'Added nasal sound when not required'
-    },
+
     {
       key: 'inconsistentTajweed',
       title: 'Inconsistent Tajweed',
