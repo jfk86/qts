@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   faVolumeHigh, 
   faEyeSlash, 
@@ -17,7 +17,18 @@ import WaqfIbtidaaSection from '../components/WaqfIbtidaaSection';
 import MinorMistakesSection from '../components/MinorMistakesSection';
 import MajorMistakesSection from '../components/MajorMistakesSection';
 
+interface Surah {
+  id: number;
+  number: number;
+  name: string;
+  nameArabic: string;
+  nameEnglish: string;
+  verses: number;
+  juzNumber: number;
+}
+
 const AssessmentPage: React.FC = () => {
+  const [selectedSurah, setSelectedSurah] = useState<Surah | null>(null);
   const tajweedRules = [
     {
       rule: 'ghunna' as const,
@@ -83,7 +94,10 @@ const AssessmentPage: React.FC = () => {
             gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
             gap: '1.5rem'
           }}>
-            <SurahSelector />
+            <SurahSelector 
+              selectedSurah={selectedSurah}
+              onSurahSelect={setSelectedSurah}
+            />
             <ScoreDisplay />
           </div>
 
