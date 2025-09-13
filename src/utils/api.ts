@@ -1,5 +1,3 @@
-import { PrismaClient } from '@prisma/client';
-
 // Note: In a real CRA app, this would be done through API routes
 // For this demo, we'll simulate API calls with local storage and mock data
 
