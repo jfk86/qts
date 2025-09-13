@@ -1,4 +1,3 @@
-
 {
   "surahs": [
     {
@@ -492,6 +491,136 @@
         "ghunna": 11,
         "ikhfaa": 10,
         "idghaam": 9,
+        "qalqalah": 4
+      }
+    },
+    {
+      "id": 39,
+      "number": 2,
+      "name": "البَقَرَة",
+      "englishName": "The Cow - Juz 1, Āyah 21-25, Page 8",
+      "tier": 2,
+      "rules": {
+        "ghunna": 6,
+        "ikhfaa": 14,
+        "idghaam": 5,
+        "qalqalah": 6
+      }
+    },
+    {
+      "id": 40,
+      "number": 2,
+      "name": "البَقَرَة",
+      "englishName": "The Cow - Juz 1, Āyah 45-50, Page 12",
+      "tier": 2,
+      "rules": {
+        "ghunna": 5,
+        "ikhfaa": 5,
+        "idghaam": 7,
+        "qalqalah": 7
+      }
+    },
+    {
+      "id": 41,
+      "number": 2,
+      "name": "البَقَرَة",
+      "englishName": "The Cow - Juz 1, Āyah 132-136, Page 29",
+      "tier": 2,
+      "rules": {
+        "ghunna": 5,
+        "ikhfaa": 5,
+        "idghaam": 3,
+        "qalqalah": 7
+      }
+    },
+    {
+      "id": 42,
+      "number": 2,
+      "name": "البَقَرَة",
+      "englishName": "The Cow - Juz 2, Āyah 197-203, Page 44",
+      "tier": 2,
+      "rules": {
+        "ghunna": 6,
+        "ikhfaa": 4,
+        "idghaam": 8,
+        "qalqalah": 2
+      }
+    },
+    {
+      "id": 43,
+      "number": 2,
+      "name": "البَقَرَة",
+      "englishName": "The Cow - Juz 3, Āyah 267-271, Page 64",
+      "tier": 3,
+      "rules": {
+        "ghunna": 5,
+        "ikhfaa": 10,
+        "idghaam": 9,
+        "qalqalah": 8
+      }
+    },
+    {
+      "id": 44,
+      "number": 54,
+      "name": "القمر",
+      "englishName": "The Moon - Juz 27, Āyah 20-33, Page 740",
+      "tier": 4,
+      "rules": {
+        "ghunna": 10,
+        "ikhfaa": 5,
+        "idghaam": 9,
+        "qalqalah": 3
+      }
+    },
+    {
+      "id": 45,
+      "number": 64,
+      "name": "التغابن",
+      "englishName": "The Cheating - Juz 28, Āyah 6-10, Page 780",
+      "tier": 3,
+      "rules": {
+        "ghunna": 7,
+        "ikhfaa": 3,
+        "idghaam": 6,
+        "qalqalah": 4
+      }
+    },
+    {
+      "id": 46,
+      "number": 67,
+      "name": "الملك",
+      "englishName": "The Kingdom - Juz 29, Āyah 18-25 & 7-16, Page 791",
+      "tier": 3,
+      "rules": {
+        "ghunna": 5,
+        "ikhfaa": 6,
+        "idghaam": 6,
+        "qalqalah": 5
+      }
+    },
+    {
+      "id": 47,
+      "number": 72,
+      "name": "الجن",
+      "englishName": "The Jinn - Juz 29, Āyah 21-28, Page 807",
+      "tier": 3,
+      "rules": {
+        "ghunna": 5,
+        "ikhfaa": 7,
+        "idghaam": 3,
+        "qalqalah": 3
+      }
+    },
+    {
+      "id": 48,
+      "number": 76,
+      "name": "الإنسان",
+      "englishName": "The Man - Juz 29, Āyah 7-16, Page 816",
+      "tier": 3,
+      "rules": {
+        "ghunna": 4,
+        "ikhfaa": 7,
+        "idghaam": 8,
         "qalqalah": 4
       }
     }

@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getStudents, createStudent } from '../utils/api';
-
-interface Student {
-  id: string;
-  name: string;
-  email?: string;
-  grade?: string;
-}
+import { getStudents, createStudent, Student } from '../utils/api';
 
 interface StudentSelectorProps {
   selectedStudent: Student | null;
