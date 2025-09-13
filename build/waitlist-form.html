@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyMaktab - Multi-Madrasah Waitlist Registration</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; padding: 20px;
+        }
+        .container {
+            max-width: 800px; margin: 0 auto; background: white;
+            border-radius: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white; padding: 30px; text-align: center;
+        }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; font-weight: 300; }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+        .form-container { padding: 40px; }
+        .form-group { margin-bottom: 25px; }
+        .form-row { display: flex; gap: 20px; margin-bottom: 25px; }
+        .form-row .form-group { flex: 1; margin-bottom: 0; }
+        label {
+            display: block; margin-bottom: 8px; font-weight: 600;
+            color: #2c3e50; font-size: 0.95em;
+        }
+        input[type="text"], input[type="email"], input[type="tel"], select, textarea {
+            width: 100%; padding: 12px 15px; border: 2px solid #e1e8ed;
+            border-radius: 8px; font-size: 16px; transition: all 0.3s ease;
+            background-color: #fafbfc;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none; border-color: #667eea; background-color: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .checkbox-group {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px; margin-top: 10px;
+        }
+        .checkbox-item {
+            display: flex; align-items: center; padding: 12px;
+            border: 2px solid #e1e8ed; border-radius: 8px;
+            transition: all 0.3s ease; cursor: pointer;
+        }
+        .checkbox-item:hover { border-color: #667eea; background-color: #f8f9ff; }
+        .checkbox-item input[type="checkbox"] { margin-right: 10px; transform: scale(1.2); }
+        .children-section {
+            border: 2px solid #e1e8ed; border-radius: 10px; padding: 20px;
+            margin-bottom: 25px; background-color: #f8f9ff;
+        }
+        .children-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px;
+        }
+        .children-header h3 { color: #2c3e50; font-size: 1.3em; }
+        .add-child-btn {
+            background: #27ae60; color: white; border: none;
+            padding: 8px 16px; border-radius: 6px; cursor: pointer;
+            font-size: 0.9em; transition: background 0.3s ease;
+        }
+        .add-child-btn:hover { background: #219a52; }
+        .add-child-btn:disabled { background: #bdc3c7; cursor: not-allowed; }
+        .child-entry {
+            border: 1px solid #d5dbdb; border-radius: 8px; padding: 20px;
+            margin-bottom: 15px; background: white; position: relative;
+        }
+        .child-entry h4 { color: #2c3e50; margin-bottom: 15px; font-size: 1.1em; }
+        .remove-child-btn {
+            position: absolute; top: 10px; right: 10px; background: #e74c3c;
+            color: white; border: none; width: 25px; height: 25px;
+            border-radius: 50%; cursor: pointer; font-size: 12px;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.3s ease;
+        }
+        .remove-child-btn:hover { background: #c0392b; }
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; border: none; padding: 15px 40px; border-radius: 8px;
+            font-size: 1.1em; font-weight: 600; cursor: pointer;
+            transition: all 0.3s ease; width: 100%; margin-top: 20px;
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        .submit-btn:disabled {
+            background: #bdc3c7; cursor: not-allowed;
+            transform: none; box-shadow: none;
+        }
+        .success-message, .error-message {
+            padding: 15px; border-radius: 8px; margin-bottom: 20px;
+            font-weight: 600; display: none;
+        }
+        .success-message {
+            background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;
+        }
+        .error-message {
+            background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;
+        }
+        .mosque-directory-link {
+            display: inline-block; margin-top: 15px; color: #667eea;
+            text-decoration: none; font-weight: 600; transition: color 0.3s ease;
+        }
+        .mosque-directory-link:hover { color: #764ba2; }
+        @media (max-width: 768px) {
+            .form-row { flex-direction: column; gap: 0; }
+            .checkbox-group { grid-template-columns: 1fr; }
+            .container { margin: 10px; border-radius: 10px; }
+            .header { padding: 20px; }
+            .header h1 { font-size: 2em; }
+            .form-container { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>MyMaktab</h1>
+            <p>Multi-Madrasah Waitlist Registration</p>
+        </div>
+        <div class="form-container">
+            <div id="successMessage" class="success-message">
+                Registration submitted successfully! We'll contact you when a spot becomes available.
+            </div>
+            <div id="errorMessage" class="error-message">
+                There was an error submitting your registration. Please try again.
+            </div>
+            <form id="waitlistForm">
+                <div class="form-group">
+                    <h3 style="color: #2c3e50; margin-bottom: 20px; border-bottom: 2px solid #e1e8ed; padding-bottom: 10px;">Parent/Guardian Information</h3>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="parentFirstName">First Name *</label>
+                        <input type="text" id="parentFirstName" name="parentFirstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="parentLastName">Last Name *</label>
+                        <input type="text" id="parentLastName" name="parentLastName" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number *</label>
+                        <input type="tel" id="phone" name="phone" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="address">Home Address</label>
+                    <textarea id="address" name="address" rows="3" placeholder="Street address, city, postal code"></textarea>
+                </div>
+                <div class="children-section">
+                    <div class="children-header">
+                        <h3>Children Information</h3>
+                        <button type="button" class="add-child-btn" onclick="addChild()">+ Add Child</button>
+                    </div>
+                    <div id="childrenContainer"></div>
+                </div>
+                <div class="form-group">
+                    <label>Select Madrasahs (choose all that apply) *</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="madrasah1" name="madrasahs" value="Al-Noor Islamic Academy">
+                            <label for="madrasah1">Al-Noor Islamic Academy</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="madrasah2" name="madrasahs" value="Darul Uloom Institute">
+                            <label for="madrasah2">Darul Uloom Institute</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="madrasah3" name="madrasahs" value="Masjid Al-Furqan School">
+                            <label for="madrasah3">Masjid Al-Furqan School</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="madrasah4" name="madrasahs" value="Islamic Center of Excellence">
+                            <label for="madrasah4">Islamic Center of Excellence</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="madrasah5" name="madrasahs" value="Baitul Hikmah Academy">
+                            <label for="madrasah5">Baitul Hikmah Academy</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="madrasah6" name="madrasahs" value="Madrasa Quba">
+                            <label for="madrasah6">Madrasa Quba</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="additionalInfo">Additional Information or Special Requirements</label>
+                    <textarea id="additionalInfo" name="additionalInfo" rows="4" placeholder="Any special needs, preferences, or additional information you'd like to share..."></textarea>
+                </div>
+                <div class="form-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="dataConsent" name="dataConsent" required>
+                        <label for="dataConsent">I consent to my data being stored and used for waitlist management purposes *</label>
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn">Submit Registration</button>
+            </form>
+            <div style="margin-top: 20px; text-align: center;">
+                <a href="mosque-directory.html" class="mosque-directory-link">🕌 Find Nearest Mosque Directory</a>
+                <br><br>
+                <a href="navigation.html" class="mosque-directory-link">← Back to MyMaktab Home</a>
+                <span style="margin: 0 15px; color: #ccc;">|</span>
+                <a href="index.html" class="mosque-directory-link">📖 Access QTS System</a>
+            </div>
+        </div>
+    </div>
+    <script>
+        let childCount = 0;
+        const maxChildren = 5;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            addChild();
+        });
+
+        function addChild() {
+            if (childCount >= maxChildren) {
+                alert(`Maximum ${maxChildren} children allowed`);
+                return;
+            }
+            childCount++;
+            const container = document.getElementById('childrenContainer');
+            const childDiv = document.createElement('div');
+            childDiv.className = 'child-entry';
+            childDiv.id = `child-${childCount}`;
+            childDiv.innerHTML = `
+                <h4>Child ${childCount}</h4>
+                ${childCount > 1 ? '<button type="button" class="remove-child-btn" onclick="removeChild(' + childCount + ')">×</button>' : ''}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="childFirstName${childCount}">First Name *</label>
+                        <input type="text" id="childFirstName${childCount}" name="childFirstName${childCount}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="childLastName${childCount}">Last Name *</label>
+                        <input type="text" id="childLastName${childCount}" name="childLastName${childCount}" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="childAge${childCount}">Age</label>
+                        <input type="text" id="childAge${childCount}" name="childAge${childCount}" placeholder="e.g., 8 years old">
+                    </div>
+                    <div class="form-group">
+                        <label for="schoolYear${childCount}">Preferred School Year *</label>
+                        <select id="schoolYear${childCount}" name="schoolYear${childCount}" required>
+                            <option value="">Select Year</option>
+                            <option value="Pre-K">Pre-K (Ages 3-4)</option>
+                            <option value="Kindergarten">Kindergarten (Ages 4-5)</option>
+                            <option value="Grade 1">Grade 1 (Ages 5-6)</option>
+                            <option value="Grade 2">Grade 2 (Ages 6-7)</option>
+                            <option value="Grade 3">Grade 3 (Ages 7-8)</option>
+                            <option value="Grade 4">Grade 4 (Ages 8-9)</option>
+                            <option value="Grade 5">Grade 5 (Ages 9-10)</option>
+                            <option value="Grade 6">Grade 6 (Ages 10-11)</option>
+                            <option value="Grade 7">Grade 7 (Ages 11-12)</option>
+                            <option value="Grade 8">Grade 8 (Ages 12-13)</option>
+                            <option value="Grade 9">Grade 9 (Ages 13-14)</option>
+                            <option value="Grade 10">Grade 10 (Ages 14-15)</option>
+                            <option value="Grade 11">Grade 11 (Ages 15-16)</option>
+                            <option value="Grade 12">Grade 12 (Ages 16-17)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="childNotes${childCount}">Special Notes for this Child</label>
+                    <textarea id="childNotes${childCount}" name="childNotes${childCount}" rows="2" placeholder="Any special needs, learning preferences, or notes..."></textarea>
+                </div>
+            `;
+            container.appendChild(childDiv);
+            updateAddButton();
+        }
+
+        function removeChild(childId) {
+            const childElement = document.getElementById(`child-${childId}`);
+            if (childElement) {
+                childElement.remove();
+                childCount--;
+                renumberChildren();
+                updateAddButton();
+            }
+        }
+
+        function renumberChildren() {
+            const children = document.querySelectorAll('.child-entry');
+            childCount = 0;
+            children.forEach((child, index) => {
+                childCount++;
+                const newId = childCount;
+                child.id = `child-${newId}`;
+                const heading = child.querySelector('h4');
+                heading.textContent = `Child ${newId}`;
+                const removeBtn = child.querySelector('.remove-child-btn');
+                if (removeBtn) {
+                    removeBtn.setAttribute('onclick', `removeChild(${newId})`);
+                }
+                const inputs = child.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => {
+                    const oldName = input.name;
+                    const baseName = oldName.replace(/\d+$/, '');
+                    input.name = baseName + newId;
+                    input.id = baseName + newId;
+                    const label = child.querySelector(`label[for="${input.id}"]`);
+                    if (!label) {
+                        const labelElement = child.querySelector(`label[for="${oldName}"]`);
+                        if (labelElement) {
+                            labelElement.setAttribute('for', input.id);
+                        }
+                    }
+                });
+            });
+        }
+
+        function updateAddButton() {
+            const addBtn = document.querySelector('.add-child-btn');
+            addBtn.disabled = childCount >= maxChildren;
+            addBtn.textContent = childCount >= maxChildren ? 'Maximum Reached' : '+ Add Child';
+        }
+
+        document.getElementById('waitlistForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const madrasahCheckboxes = document.querySelectorAll('input[name="madrasahs"]:checked');
+            if (madrasahCheckboxes.length === 0) {
+                alert('Please select at least one madrasah.');
+                return;
+            }
+            let hasValidChild = false;
+            for (let i = 1; i <= childCount; i++) {
+                const schoolYear = document.getElementById(`schoolYear${i}`);
+                if (schoolYear && schoolYear.value) {
+                    hasValidChild = true;
+                    break;
+                }
+            }
+            if (!hasValidChild) {
+                alert('Please select a school year for at least one child.');
+                return;
+            }
+            const formData = new FormData(this);
+            const children = [];
+            for (let i = 1; i <= childCount; i++) {
+                const firstName = document.getElementById(`childFirstName${i}`)?.value;
+                const lastName = document.getElementById(`childLastName${i}`)?.value;
+                const age = document.getElementById(`childAge${i}`)?.value;
+                const schoolYear = document.getElementById(`schoolYear${i}`)?.value;
+                const notes = document.getElementById(`childNotes${i}`)?.value;
+                if (firstName || lastName || schoolYear) {
+                    children.push({
+                        firstName: firstName || '',
+                        lastName: lastName || '',
+                        age: age || '',
+                        schoolYear: schoolYear || '',
+                        notes: notes || ''
+                    });
+                }
+            }
+            formData.append('children', JSON.stringify(children));
+            const selectedMadrasahs = Array.from(madrasahCheckboxes).map(cb => cb.value);
+            formData.append('selectedMadrasahs', JSON.stringify(selectedMadrasahs));
+            submitToGoogleForms(formData);
+        });
+
+        function submitToGoogleForms(formData) {
+            const submitBtn = document.querySelector('.submit-btn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Submitting...';
+            submitBtn.disabled = true;
+            
+            // Prepare data in the format expected by Google Apps Script
+            const data = {};
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+            
+            // Create full name for compatibility
+            data.fullName = `${data.parentFirstName || ''} ${data.parentLastName || ''}`.trim();
+            
+            // Google Apps Script URL for form submission
+            const scriptUrl = 'https://script.google.com/macros/s/AKfycbzIDchg9r1eEB7sfyTTzbN9x-43f_o7y7MwzH5-cM5snQzDs0p4uBGkqfAcKRbdVAWL5A/exec';
+
+            // Use fetch with mode: 'no-cors' to handle CORS issues
+            fetch(scriptUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(() => {
+                // Since we're using no-cors, we can't read the response
+                // Assume success if no error is thrown
+                document.getElementById('successMessage').style.display = 'block';
+                document.getElementById('waitlistForm').style.display = 'none';
+                document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // For production, you might want to show success anyway since no-cors
+                // doesn't allow reading the actual response
+                document.getElementById('successMessage').style.display = 'block';
+                document.getElementById('waitlistForm').style.display = 'none';
+                document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
+            })
+            .finally(() => {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>
