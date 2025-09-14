@@ -1,10 +1,13 @@
-# Waitlist Form Fix Instructions
+# Waitlist Form Fix Instructions - UPDATED
 
 ## Problem Identified
-The waitlist form submission was not working correctly because:
-1. The form was sending comprehensive data (parent info, children details, madrasah selections)
-2. The Google Apps Script was not properly handling all the form fields
-3. The Google Sheets structure didn't match the form data
+The waitlist form was submitting data to the WRONG Google Sheets because:
+1. **MAIN ISSUE**: The Google Apps Script URL in the HTML form was pointing to an old deployment connected to the wrong spreadsheet
+2. **Wrong Spreadsheet ID**: Form was submitting to `1XZ4cnq5_QyRjvu7csEVHsPKabBnarXx5NrEmQU1oVAQ` 
+3. **Correct Spreadsheet ID**: Should submit to `1z1sVMI9kR4HS4va3filYdEWbjVS881nLx26qpE3YFu8`
+
+## Root Cause
+The Google Apps Script URL in the waitlist form was hardcoded to an old deployment that was configured with the wrong spreadsheet ID.
 
 ## Solution Implemented
 
@@ -22,30 +25,36 @@ The waitlist form submission was not working correctly because:
 - Includes error handling and logging
 - Supports up to 5 children per family
 
-## Deployment Steps
+## CRITICAL FIX REQUIRED - Deployment Steps
 
-### Step 1: Deploy the New Google Apps Script
+### Step 1: Deploy the Updated Google Apps Script
 
 1. Go to [Google Apps Script](https://script.google.com/)
 2. Click "New Project"
 3. Replace the default code with the content from `waitlist-apps-script.gs`
-4. Save the project with name "MyMaktab Waitlist Handler"
-5. Click "Deploy" → "New Deployment"
-6. Choose type: "Web app"
-7. Set execute as: "Me"
-8. Set access: "Anyone"
-9. Click "Deploy"
-10. **Copy the new Web App URL** (it will look like: `https://script.google.com/macros/s/[SCRIPT_ID]/exec`)
+4. **VERIFY** the SPREADSHEET_ID is set to: `1z1sVMI9kR4HS4va3filYdEWbjVS881nLx26qpE3YFu8`
+5. Save the project with name "MyMaktab Waitlist Handler - FIXED"
+6. Click "Deploy" → "New Deployment"
+7. Choose type: "Web app"
+8. Set execute as: "Me"
+9. Set access: "Anyone"
+10. Click "Deploy"
+11. **Copy the new Web App URL** (it will look like: `https://script.google.com/macros/s/[NEW_SCRIPT_ID]/exec`)
 
-### Step 2: Update the Form
+### Step 2: Update the Form with New Script URL
 
 1. Open `docs/waitlist-form.html`
-2. Find this line (around line 400):
+2. Find this line (around line 561):
    ```javascript
-   const scriptUrl = 'https://script.google.com/macros/s/AKfycbzIDchg9r1eEB7sfyTTzbN9x-43f_o7y7MwzH5-cM5snQzDs0p4uBGkqfAcKRbdVAWL5A/exec';
+   const scriptUrl = 'REPLACE_WITH_NEW_GOOGLE_APPS_SCRIPT_URL';
    ```
-3. Replace the URL with your new Web App URL from Step 1
+3. Replace `REPLACE_WITH_NEW_GOOGLE_APPS_SCRIPT_URL` with your new Web App URL from Step 1
 4. Save the file
+
+### Step 3: IMPORTANT - Delete/Disable Old Script
+1. Find the old Google Apps Script deployment (the one with the wrong spreadsheet ID)
+2. Either delete it or disable it to prevent confusion
+3. The old URL was: `https://script.google.com/macros/s/AKfycbzIDchg9r1eEB7sfyTTzbN9x-43f_o7y7MwzH5-cM5snQzDs0p4uBGkqfAcKRbdVAWL5A/exec`
 
 ### Step 3: Test the Integration
 
