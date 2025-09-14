@@ -44,12 +44,23 @@
             gap: 15px; margin-top: 10px;
         }
         .checkbox-item {
-            display: flex; align-items: center; padding: 12px;
+            display: flex; align-items: flex-start; padding: 12px;
             border: 2px solid #e1e8ed; border-radius: 8px;
             transition: all 0.3s ease; cursor: pointer;
         }
         .checkbox-item:hover { border-color: #667eea; background-color: #f8f9ff; }
-        .checkbox-item input[type="checkbox"] { margin-right: 10px; transform: scale(1.2); }
+        .checkbox-item input[type="checkbox"] { 
+            margin-right: 10px; margin-top: 2px; transform: scale(1.2); 
+        }
+        .checkbox-item-content {
+            flex: 1;
+        }
+        .checkbox-item-title {
+            font-weight: 600; color: #2c3e50; margin-bottom: 4px;
+        }
+        .checkbox-item-desc {
+            font-size: 0.85em; color: #666; line-height: 1.3;
+        }
         .children-section {
             border: 2px solid #e1e8ed; border-radius: 10px; padding: 20px;
             margin-bottom: 25px; background-color: #f8f9ff;
@@ -108,6 +119,15 @@
             text-decoration: none; font-weight: 600; transition: color 0.3s ease;
         }
         .mosque-directory-link:hover { color: #764ba2; }
+        .data-source-info {
+            background: #e8f4fd; border: 1px solid #bee5eb; border-radius: 8px;
+            padding: 15px; margin-bottom: 20px; font-size: 0.9em; color: #0c5460;
+        }
+        .data-source-info strong { color: #0a4c57; }
+        .loading-madrasahs {
+            text-align: center; padding: 20px; color: #666;
+            font-style: italic;
+        }
         @media (max-width: 768px) {
             .form-row { flex-direction: column; gap: 0; }
             .checkbox-group { grid-template-columns: 1fr; }
@@ -125,16 +145,23 @@
             <p>Multi-Madrasah Waitlist Registration</p>
         </div>
         <div class="form-container">
+            <div class="data-source-info">
+                <strong>📊 Dynamic System:</strong> Madrasah options and form submissions are managed through Google Sheets. 
+                <a href="https://docs.google.com/spreadsheets/d/1z1sVMI9kR4HS4va3filYdEWbjVS881nLx26qpE3YFu8/edit" target="_blank" style="color: #0c5460; text-decoration: underline;">View/Edit Backend</a>
+            </div>
+            
             <div id="successMessage" class="success-message">
                 Registration submitted successfully! We'll contact you when a spot becomes available.
             </div>
             <div id="errorMessage" class="error-message">
                 There was an error submitting your registration. Please try again.
             </div>
+            
             <form id="waitlistForm">
                 <div class="form-group">
                     <h3 style="color: #2c3e50; margin-bottom: 20px; border-bottom: 2px solid #e1e8ed; padding-bottom: 10px;">Parent/Guardian Information</h3>
                 </div>
+                
                 <div class="form-row">
                     <div class="form-group">
                         <label for="parentFirstName">First Name *</label>
@@ -145,6 +172,7 @@
                         <input type="text" id="parentLastName" name="parentLastName" required>
                     </div>
                 </div>
+                
                 <div class="form-row">
                     <div class="form-group">
                         <label for="email">Email Address *</label>
@@ -155,10 +183,12 @@
                         <input type="tel" id="phone" name="phone" required>
                     </div>
                 </div>
+                
                 <div class="form-group">
                     <label for="address">Home Address</label>
                     <textarea id="address" name="address" rows="3" placeholder="Street address, city, postal code"></textarea>
                 </div>
+                
                 <div class="children-section">
                     <div class="children-header">
                         <h3>Children Information</h3>
@@ -166,47 +196,31 @@
                     </div>
                     <div id="childrenContainer"></div>
                 </div>
+                
                 <div class="form-group">
                     <label>Select Madrasahs (choose all that apply) *</label>
-                    <div class="checkbox-group">
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="madrasah1" name="madrasahs" value="Al-Noor Islamic Academy">
-                            <label for="madrasah1">Al-Noor Islamic Academy</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="madrasah2" name="madrasahs" value="Darul Uloom Institute">
-                            <label for="madrasah2">Darul Uloom Institute</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="madrasah3" name="madrasahs" value="Masjid Al-Furqan School">
-                            <label for="madrasah3">Masjid Al-Furqan School</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="madrasah4" name="madrasahs" value="Islamic Center of Excellence">
-                            <label for="madrasah4">Islamic Center of Excellence</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="madrasah5" name="madrasahs" value="Baitul Hikmah Academy">
-                            <label for="madrasah5">Baitul Hikmah Academy</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="madrasah6" name="madrasahs" value="Madrasa Quba">
-                            <label for="madrasah6">Madrasa Quba</label>
+                    <div id="madrasahsContainer" class="checkbox-group">
+                        <div class="loading-madrasahs">
+                            Loading madrasah options from Google Sheets...
                         </div>
                     </div>
                 </div>
+                
                 <div class="form-group">
                     <label for="additionalInfo">Additional Information or Special Requirements</label>
                     <textarea id="additionalInfo" name="additionalInfo" rows="4" placeholder="Any special needs, preferences, or additional information you'd like to share..."></textarea>
                 </div>
+                
                 <div class="form-group">
                     <div class="checkbox-item">
                         <input type="checkbox" id="dataConsent" name="dataConsent" required>
                         <label for="dataConsent">I consent to my data being stored and used for waitlist management purposes *</label>
                     </div>
                 </div>
+                
                 <button type="submit" class="submit-btn">Submit Registration</button>
             </form>
+            
             <div style="margin-top: 20px; text-align: center;">
                 <a href="mosque-directory.html" class="mosque-directory-link">🕌 Find Nearest Mosque Directory</a>
                 <br><br>
@@ -216,19 +230,154 @@
             </div>
         </div>
     </div>
+    
     <script>
         let childCount = 0;
         const maxChildren = 5;
+        let madrasahData = [];
+
+        // Google Sheets Configuration
+        const SHEET_CONFIG = {
+            sheetId: '1z1sVMI9kR4HS4va3filYdEWbjVS881nLx26qpE3YFu8',
+            madrasahsGid: '622653411' // Madrasahs sheet GID
+        };
+
+        // Fallback madrasah data
+        const fallbackMadrasahData = [
+            {
+                name: "Al-Noor Islamic Academy",
+                location: "Toronto, ON",
+                contact: "(416) 555-0123",
+                description: "Full-time Islamic education with modern curriculum"
+            },
+            {
+                name: "Darul Uloom Institute",
+                location: "Mississauga, ON", 
+                contact: "(905) 555-0456",
+                description: "Traditional Islamic studies and Quran memorization"
+            },
+            {
+                name: "Masjid Al-Furqan School",
+                location: "Markham, ON",
+                contact: "(905) 555-0789", 
+                description: "Weekend Islamic school and Arabic classes"
+            },
+            {
+                name: "Islamic Center of Excellence",
+                location: "Brampton, ON",
+                contact: "(905) 555-0321",
+                description: "Comprehensive Islamic education and character development"
+            },
+            {
+                name: "Baitul Hikmah Academy", 
+                location: "Richmond Hill, ON",
+                contact: "(905) 555-0654",
+                description: "Bilingual Islamic education with STEM focus"
+            },
+            {
+                name: "Madrasa Quba",
+                location: "Vaughan, ON",
+                contact: "(905) 555-0987",
+                description: "Community-based Islamic learning center"
+            }
+        ];
 
         document.addEventListener('DOMContentLoaded', function() {
-            addChild();
+            loadMadrasahData();
+            addChild(); // Add first child by default
         });
+
+        async function loadMadrasahData() {
+            try {
+                // Try to load from Google Sheets using public CSV export
+                const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_CONFIG.sheetId}/export?format=csv&gid=${SHEET_CONFIG.madrasahsGid}`;
+                const response = await fetch(csvUrl);
+                
+                if (response.ok) {
+                    const csvText = await response.text();
+                    madrasahData = parseCSVData(csvText);
+                    console.log('✅ Successfully loaded madrasah data from Google Sheets');
+                } else {
+                    throw new Error('Failed to load from Google Sheets');
+                }
+            } catch (error) {
+                console.log('⚠️ Using fallback madrasah data:', error.message);
+                madrasahData = fallbackMadrasahData;
+            }
+            
+            displayMadrasahOptions();
+        }
+
+        function parseCSVData(csvText) {
+            const lines = csvText.split('\n');
+            const data = [];
+            
+            // Skip header row (index 0)
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                
+                const columns = parseCSVLine(line);
+                if (columns.length >= 4 && columns[0]) {
+                    data.push({
+                        name: columns[0] || '',
+                        location: columns[1] || '',
+                        contact: columns[2] || '',
+                        description: columns[3] || ''
+                    });
+                }
+            }
+            
+            return data;
+        }
+
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            
+            result.push(current.trim());
+            return result;
+        }
+
+        function displayMadrasahOptions() {
+            const container = document.getElementById('madrasahsContainer');
+            
+            if (madrasahData.length === 0) {
+                container.innerHTML = '<div class="loading-madrasahs">No madrasah options available.</div>';
+                return;
+            }
+            
+            container.innerHTML = madrasahData.map((madrasah, index) => `
+                <div class="checkbox-item">
+                    <input type="checkbox" id="madrasah${index + 1}" name="madrasahs" value="${madrasah.name}">
+                    <div class="checkbox-item-content">
+                        <div class="checkbox-item-title">${madrasah.name}</div>
+                        <div class="checkbox-item-desc">${madrasah.location} • ${madrasah.description}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
 
         function addChild() {
             if (childCount >= maxChildren) {
                 alert(`Maximum ${maxChildren} children allowed`);
                 return;
             }
+            
             childCount++;
             const container = document.getElementById('childrenContainer');
             const childDiv = document.createElement('div');
@@ -295,22 +444,27 @@
         function renumberChildren() {
             const children = document.querySelectorAll('.child-entry');
             childCount = 0;
+            
             children.forEach((child, index) => {
                 childCount++;
                 const newId = childCount;
                 child.id = `child-${newId}`;
+                
                 const heading = child.querySelector('h4');
                 heading.textContent = `Child ${newId}`;
+                
                 const removeBtn = child.querySelector('.remove-child-btn');
                 if (removeBtn) {
                     removeBtn.setAttribute('onclick', `removeChild(${newId})`);
                 }
+                
                 const inputs = child.querySelectorAll('input, select, textarea');
                 inputs.forEach(input => {
                     const oldName = input.name;
                     const baseName = oldName.replace(/\d+$/, '');
                     input.name = baseName + newId;
                     input.id = baseName + newId;
+                    
                     const label = child.querySelector(`label[for="${input.id}"]`);
                     if (!label) {
                         const labelElement = child.querySelector(`label[for="${oldName}"]`);
@@ -330,11 +484,15 @@
 
         document.getElementById('waitlistForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            
+            // Validate madrasah selection
             const madrasahCheckboxes = document.querySelectorAll('input[name="madrasahs"]:checked');
             if (madrasahCheckboxes.length === 0) {
                 alert('Please select at least one madrasah.');
                 return;
             }
+            
+            // Validate at least one child with school year
             let hasValidChild = false;
             for (let i = 1; i <= childCount; i++) {
                 const schoolYear = document.getElementById(`schoolYear${i}`);
@@ -343,11 +501,16 @@
                     break;
                 }
             }
+            
             if (!hasValidChild) {
                 alert('Please select a school year for at least one child.');
                 return;
             }
+            
+            // Prepare form data
             const formData = new FormData(this);
+            
+            // Collect children data
             const children = [];
             for (let i = 1; i <= childCount; i++) {
                 const firstName = document.getElementById(`childFirstName${i}`)?.value;
@@ -355,6 +518,7 @@
                 const age = document.getElementById(`childAge${i}`)?.value;
                 const schoolYear = document.getElementById(`schoolYear${i}`)?.value;
                 const notes = document.getElementById(`childNotes${i}`)?.value;
+                
                 if (firstName || lastName || schoolYear) {
                     children.push({
                         firstName: firstName || '',
@@ -365,31 +529,36 @@
                     });
                 }
             }
+            
             formData.append('children', JSON.stringify(children));
+            
+            // Collect selected madrasahs
             const selectedMadrasahs = Array.from(madrasahCheckboxes).map(cb => cb.value);
             formData.append('selectedMadrasahs', JSON.stringify(selectedMadrasahs));
-            submitToGoogleForms(formData);
+            
+            submitToGoogleSheets(formData);
         });
 
-        function submitToGoogleForms(formData) {
+        function submitToGoogleSheets(formData) {
             const submitBtn = document.querySelector('.submit-btn');
             const originalText = submitBtn.textContent;
             submitBtn.textContent = 'Submitting...';
             submitBtn.disabled = true;
             
-            // Prepare data in the format expected by Google Apps Script
+            // Prepare data for Google Apps Script
             const data = {};
             for (let [key, value] of formData.entries()) {
                 data[key] = value;
             }
             
-            // Create full name for compatibility
+            // Add timestamp and full name
+            data.timestamp = new Date().toISOString();
             data.fullName = `${data.parentFirstName || ''} ${data.parentLastName || ''}`.trim();
             
             // Google Apps Script URL for form submission
             const scriptUrl = 'https://script.google.com/macros/s/AKfycbzIDchg9r1eEB7sfyTTzbN9x-43f_o7y7MwzH5-cM5snQzDs0p4uBGkqfAcKRbdVAWL5A/exec';
 
-            // Use fetch with mode: 'no-cors' to handle CORS issues
+            // Submit to Google Sheets
             fetch(scriptUrl, {
                 method: 'POST',
                 mode: 'no-cors',
@@ -397,16 +566,14 @@
                 body: JSON.stringify(data)
             })
             .then(() => {
-                // Since we're using no-cors, we can't read the response
-                // Assume success if no error is thrown
+                // Show success message
                 document.getElementById('successMessage').style.display = 'block';
                 document.getElementById('waitlistForm').style.display = 'none';
                 document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
             })
             .catch(error => {
                 console.error('Error:', error);
-                // For production, you might want to show success anyway since no-cors
-                // doesn't allow reading the actual response
+                // Show success anyway since no-cors doesn't allow reading response
                 document.getElementById('successMessage').style.display = 'block';
                 document.getElementById('waitlistForm').style.display = 'none';
                 document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
