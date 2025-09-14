@@ -3,9 +3,12 @@
  * Google Apps Script to process waitlist form submissions
  */
 
-// Configuration
-const SPREADSHEET_ID = '1z1sVMI9kR4HS4va3filYdEWbjVS881nLx26qpE3YFu8';
+// Configuration - UPDATED TO CORRECT SPREADSHEET
+const SPREADSHEET_ID = '1z1sVMI9kR4HS4va3filYdEWbjVS881nLx26qpE3YFu8'; // Correct MyMaktab Backend Spreadsheet
 const SHEET_NAME = 'Waitlist';
+
+// IMPORTANT: This script must be deployed as a new Web App after any changes
+// The old script URL was pointing to the wrong spreadsheet: 1XZ4cnq5_QyRjvu7csEVHsPKabBnarXx5NrEmQU1oVAQ
 
 /**
  * Handle POST requests from the waitlist form
