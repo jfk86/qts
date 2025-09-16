@@ -1,236 +1,472 @@
 /**
- * MyMaktab Waitlist Form Handler
- * Google Apps Script to process waitlist form submissions
+ * MyMaktab Multi-Madrasah Waitlist Service - Secure API Gateway
+ * Handles all data operations securely without exposing sensitive information
  */
 
-// Configuration - UPDATED TO CORRECT SPREADSHEET
-const SPREADSHEET_ID = '1z1sVMI9kR4HS4va3filYdEWbjVS881nLx26qpE3YFu8'; // Correct MyMaktab Backend Spreadsheet
-const SHEET_NAME = 'Waitlist';
-
-// IMPORTANT: This script must be deployed as a new Web App after any changes
-// The old script URL was pointing to the wrong spreadsheet: 1XZ4cnq5_QyRjvu7csEVHsPKabBnarXx5NrEmQU1oVAQ
+// Configuration - Update these values for your setup
+const CONFIG = {
+  WAITLIST_SPREADSHEET_ID: 'YOUR_WAITLIST_SPREADSHEET_ID_HERE',
+  MOSQUE_SPREADSHEET_ID: 'YOUR_MOSQUE_SPREADSHEET_ID_HERE',
+  WAITLIST_SHEET_NAME: 'Waitlist_Submissions',
+  MOSQUE_SHEET_NAME: 'Mosque_Directory',
+  EMAIL_NOTIFICATIONS: true,
+  ADMIN_EMAIL: 'admin@mymaktab.com'
+};
 
 /**
- * Handle POST requests from the waitlist form
+ * Main entry point for all requests
+ */
+function doGet(e) {
+  const action = e.parameter.action;
+
+  try {
+    switch(action) {
+      case 'getMosques':
+        return getMosqueDirectory(e);
+      case 'test':
+        return ContentService
+          .createTextOutput('API is working!')
+          .setMimeType(ContentService.MimeType.TEXT);
+      default:
+        return ContentService
+          .createTextOutput(JSON.stringify({ error: 'Invalid action' }))
+          .setMimeType(ContentService.MimeType.JSON);
+    }
+  } catch (error) {
+    console.error('Error in doGet:', error);
+    return ContentService
+      .createTextOutput(JSON.stringify({ error: 'Server error' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
+ * Handle POST requests (form submissions)
  */
 function doPost(e) {
   try {
-    // Log the incoming request for debugging
-    console.log('Received POST request:', JSON.stringify(e.parameter));
-    
-    // Parse the form data
-    const formData = e.parameter;
-    
-    // Open the spreadsheet
-    const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
-    const sheet = spreadsheet.getSheetByName(SHEET_NAME);
-    
-    // Ensure headers exist
-    if (sheet.getLastRow() === 0) {
-      setupHeaders(sheet);
+    const data = JSON.parse(e.postData.contents);
+    const action = data.action;
+
+    switch(action) {
+      case 'submitWaitlist':
+        return submitWaitlistForm(data);
+      default:
+        return ContentService
+          .createTextOutput(JSON.stringify({ success: false, message: 'Invalid action' }))
+          .setMimeType(ContentService.MimeType.JSON);
     }
-    
-    // Process and add the data
-    const rowData = processFormData(formData);
-    sheet.appendRow(rowData);
-    
-    // Return success response
-    return ContentService
-      .createTextOutput(JSON.stringify({
-        status: 'success',
-        message: 'Waitlist registration submitted successfully'
-      }))
-      .setMimeType(ContentService.MimeType.JSON);
-      
   } catch (error) {
-    console.error('Error processing form submission:', error);
-    
-    // Return error response
+    console.error('Error in doPost:', error);
     return ContentService
-      .createTextOutput(JSON.stringify({
-        status: 'error',
-        message: 'Failed to process registration: ' + error.toString()
-      }))
+      .createTextOutput(JSON.stringify({ success: false, message: 'Server error' }))
       .setMimeType(ContentService.MimeType.JSON);
   }
 }
 
 /**
- * Handle GET requests (for testing)
+ * Get mosque directory data securely
  */
-function doGet(e) {
-  return ContentService
-    .createTextOutput('MyMaktab Waitlist API is running! Use POST to submit form data.')
-    .setMimeType(ContentService.MimeType.TEXT);
+function getMosqueDirectory(e) {
+  try {
+    const search = e.parameter.search || '';
+    const type = e.parameter.type || '';
+    const city = e.parameter.city || '';
+
+    const spreadsheet = SpreadsheetApp.openById(CONFIG.MOSQUE_SPREADSHEET_ID);
+    const sheet = spreadsheet.getSheetByName(CONFIG.MOSQUE_SHEET_NAME);
+
+    if (!sheet) {
+      throw new Error('Mosque directory sheet not found');
+    }
+
+    const data = sheet.getDataRange().getValues();
+    const headers = data[0];
+    const rows = data.slice(1);
+
+    // Convert to objects
+    let mosques = rows.map(row => {
+      const mosque = {};
+      headers.forEach((header, index) => {
+        mosque[header.toLowerCase().replace(/\s+/g, '_')] = row[index];
+      });
+      return mosque;
+    });
+
+    // Apply filters
+    if (search) {
+      const searchLower = search.toLowerCase();
+      mosques = mosques.filter(mosque => 
+        mosque.name?.toLowerCase().includes(searchLower) ||
+        mosque.address?.toLowerCase().includes(searchLower) ||
+        mosque.city?.toLowerCase().includes(searchLower) ||
+        mosque.services?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    if (type && type !== 'all') {
+      mosques = mosques.filter(mosque => 
+        mosque.type?.toLowerCase() === type.toLowerCase()
+      );
+    }
+
+    if (city && city !== 'all') {
+      mosques = mosques.filter(mosque => 
+        mosque.city?.toLowerCase() === city.toLowerCase()
+      );
+    }
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: true, data: mosques }))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch (error) {
+    console.error('Error getting mosque directory:', error);
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: false, error: 'Failed to load mosque directory' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 }
 
 /**
- * Set up column headers in the sheet
+ * Submit waitlist form securely
  */
-function setupHeaders(sheet) {
+function submitWaitlistForm(data) {
+  try {
+    // Validate required fields
+    if (!validateWaitlistData(data)) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ success: false, message: 'Invalid form data' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // Get or create spreadsheet
+    const sheet = getOrCreateWaitlistSheet();
+
+    // Save data
+    const result = saveWaitlistToSheet(sheet, data);
+
+    // Send notifications if enabled
+    if (CONFIG.EMAIL_NOTIFICATIONS && result.success) {
+      sendWaitlistNotifications(data);
+    }
+
+    return ContentService
+      .createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch (error) {
+    console.error('Error submitting waitlist:', error);
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: false, message: 'Server error occurred' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
+ * Validate waitlist form data
+ */
+function validateWaitlistData(data) {
+  const required = ['parentName', 'email', 'phone', 'children'];
+
+  for (let field of required) {
+    if (!data[field]) {
+      console.error(`Missing required field: ${field}`);
+      return false;
+    }
+  }
+
+  // Validate children data
+  if (!Array.isArray(data.children) || data.children.length === 0) {
+    console.error('No children data provided');
+    return false;
+  }
+
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(data.email)) {
+    console.error('Invalid email format');
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Get or create the waitlist spreadsheet and sheet
+ */
+function getOrCreateWaitlistSheet() {
+  try {
+    const spreadsheet = SpreadsheetApp.openById(CONFIG.WAITLIST_SPREADSHEET_ID);
+    let sheet = spreadsheet.getSheetByName(CONFIG.WAITLIST_SHEET_NAME);
+
+    if (!sheet) {
+      sheet = spreadsheet.insertSheet(CONFIG.WAITLIST_SHEET_NAME);
+      setupWaitlistHeaders(sheet);
+    }
+
+    return sheet;
+
+  } catch (error) {
+    console.error('Error accessing waitlist spreadsheet:', error);
+    throw new Error('Could not access waitlist spreadsheet');
+  }
+}
+
+/**
+ * Setup waitlist sheet headers
+ */
+function setupWaitlistHeaders(sheet) {
   const headers = [
     'Timestamp',
-    'Full Name', 
+    'Parent Name',
     'Email',
     'Phone',
     'Address',
-    'Parent First Name',
-    'Parent Last Name',
-    'Selected Madrasahs',
-    'Additional Info',
-    'Data Consent',
+    'Emergency Contact',
+    'Emergency Phone',
+    'Preferred Madrasahs',
     'Children Count',
-    'Child 1 First Name',
-    'Child 1 Last Name', 
-    'Child 1 Age',
-    'Child 1 School Year',
-    'Child 1 Notes',
-    'Child 2 First Name',
-    'Child 2 Last Name',
-    'Child 2 Age', 
-    'Child 2 School Year',
-    'Child 2 Notes',
-    'Child 3 First Name',
-    'Child 3 Last Name',
-    'Child 3 Age',
-    'Child 3 School Year', 
-    'Child 3 Notes',
-    'Child 4 First Name',
-    'Child 4 Last Name',
-    'Child 4 Age',
-    'Child 4 School Year',
-    'Child 4 Notes',
-    'Child 5 First Name',
-    'Child 5 Last Name',
-    'Child 5 Age',
-    'Child 5 School Year',
-    'Child 5 Notes'
+    'Children Details',
+    'Special Requirements',
+    'Data Consent',
+    'Status',
+    'Priority Score'
   ];
-  
+
   sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-  
-  // Format headers
-  const headerRange = sheet.getRange(1, 1, 1, headers.length);
-  headerRange.setFontWeight('bold');
-  headerRange.setBackground('#4285f4');
-  headerRange.setFontColor('white');
+  sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
+  sheet.setFrozenRows(1);
 }
 
 /**
- * Process form data into a row array
+ * Save waitlist data to sheet
  */
-function processFormData(formData) {
-  // Get timestamp
-  const timestamp = new Date().toLocaleString();
-  
-  // Basic info
-  const fullName = (formData.parentFirstName || '') + ' ' + (formData.parentLastName || '');
-  const email = formData.email || '';
-  const phone = formData.phone || '';
-  const address = formData.address || '';
-  const parentFirstName = formData.parentFirstName || '';
-  const parentLastName = formData.parentLastName || '';
-  
-  // Parse selected madrasahs
-  let selectedMadrasahs = '';
+function saveWaitlistToSheet(sheet, data) {
   try {
-    if (formData.selectedMadrasahs) {
-      const madrasahsArray = JSON.parse(formData.selectedMadrasahs);
-      selectedMadrasahs = madrasahsArray.join(', ');
-    }
-  } catch (e) {
-    console.log('Error parsing madrasahs:', e);
-    selectedMadrasahs = formData.selectedMadrasahs || '';
+    const timestamp = new Date();
+
+    // Format children data
+    const childrenDetails = data.children.map(child => 
+      `${child.name} (Age: ${child.age}, School Year: ${child.schoolYear}${child.notes ? ', Notes: ' + child.notes : ''})`
+    ).join('; ');
+
+    // Calculate priority score
+    const priorityScore = calculatePriorityScore(data.children);
+
+    const rowData = [
+      timestamp,
+      data.parentName,
+      data.email,
+      data.phone,
+      data.address || '',
+      data.emergencyContact || '',
+      data.emergencyPhone || '',
+      Array.isArray(data.preferredMadrasahs) ? data.preferredMadrasahs.join(', ') : data.preferredMadrasahs,
+      data.children.length,
+      childrenDetails,
+      data.specialRequirements || '',
+      data.dataConsent ? 'Yes' : 'No',
+      'Pending',
+      priorityScore
+    ];
+
+    sheet.appendRow(rowData);
+
+    return { 
+      success: true, 
+      message: 'Application submitted successfully',
+      timestamp: timestamp,
+      priorityScore: priorityScore
+    };
+
+  } catch (error) {
+    console.error('Error saving waitlist to sheet:', error);
+    return { success: false, message: 'Failed to save application' };
   }
-  
-  const additionalInfo = formData.additionalInfo || '';
-  const dataConsent = formData.dataConsent || 'false';
-  
-  // Parse children data
-  let children = [];
-  let childrenCount = 0;
-  
-  try {
-    if (formData.children) {
-      children = JSON.parse(formData.children);
-      childrenCount = children.length;
-    }
-  } catch (e) {
-    console.log('Error parsing children data:', e);
-    // Fallback: try to extract individual child fields
-    for (let i = 1; i <= 5; i++) {
-      const firstName = formData[`childFirstName${i}`];
-      const lastName = formData[`childLastName${i}`];
-      const age = formData[`childAge${i}`];
-      const schoolYear = formData[`schoolYear${i}`];
-      const notes = formData[`childNotes${i}`];
-      
-      if (firstName || lastName || schoolYear) {
-        children.push({
-          firstName: firstName || '',
-          lastName: lastName || '',
-          age: age || '',
-          schoolYear: schoolYear || '',
-          notes: notes || ''
-        });
-        childrenCount++;
-      }
-    }
-  }
-  
-  // Build the row data array
-  const rowData = [
-    timestamp,
-    fullName.trim(),
-    email,
-    phone,
-    address,
-    parentFirstName,
-    parentLastName,
-    selectedMadrasahs,
-    additionalInfo,
-    dataConsent,
-    childrenCount
-  ];
-  
-  // Add up to 5 children's data
-  for (let i = 0; i < 5; i++) {
-    if (i < children.length) {
-      const child = children[i];
-      rowData.push(
-        child.firstName || '',
-        child.lastName || '',
-        child.age || '',
-        child.schoolYear || '',
-        child.notes || ''
-      );
-    } else {
-      // Empty cells for unused child slots
-      rowData.push('', '', '', '', '');
-    }
-  }
-  
-  return rowData;
 }
 
 /**
- * Test function to verify the script works
+ * Calculate priority score based on children ages and other factors
  */
-function testScript() {
+function calculatePriorityScore(children) {
+  let score = 0;
+
+  children.forEach(child => {
+    const age = parseInt(child.age) || 0;
+    // Younger children get higher priority (inverse scoring)
+    score += Math.max(0, 18 - age) * 10;
+
+    // Add points for specific school years
+    const yearPoints = {
+      'reception': 50,
+      'year1': 45,
+      'year2': 40,
+      'year3': 35,
+      'year4': 30,
+      'year5': 25,
+      'year6': 20
+    };
+
+    score += yearPoints[child.schoolYear] || 0;
+  });
+
+  // Add random component for tie-breaking
+  score += Math.floor(Math.random() * 100);
+
+  return score;
+}
+
+/**
+ * Send email notifications for waitlist
+ */
+function sendWaitlistNotifications(data) {
+  try {
+    // Send confirmation to parent
+    sendParentConfirmation(data);
+
+    // Send notification to admin
+    sendAdminNotification(data);
+
+  } catch (error) {
+    console.error('Error sending notifications:', error);
+  }
+}
+
+/**
+ * Send confirmation email to parent
+ */
+function sendParentConfirmation(data) {
+  const subject = 'MyMaktab Waitlist - Application Received';
+  const body = `
+Dear ${data.parentName},
+
+Thank you for submitting your waitlist application to MyMaktab.
+
+Application Details:
+- Parent: ${data.parentName}
+- Email: ${data.email}
+- Phone: ${data.phone}
+- Children: ${data.children.length}
+- Preferred Madrasahs: ${Array.isArray(data.preferredMadrasahs) ? data.preferredMadrasahs.join(', ') : data.preferredMadrasahs}
+
+Children Details:
+${data.children.map(child => `- ${child.name} (Age: ${child.age}, School Year: ${child.schoolYear})`).join('\n')}
+
+We will review your application and contact you when places become available at your preferred madrasahs.
+
+Best regards,
+MyMaktab Team
+
+---
+This is an automated message. Please do not reply to this email.
+  `;
+
+  MailApp.sendEmail(data.email, subject, body);
+}
+
+/**
+ * Send notification to admin
+ */
+function sendAdminNotification(data) {
+  const subject = 'New Waitlist Application - MyMaktab';
+  const body = `
+New waitlist application received:
+
+Parent: ${data.parentName}
+Email: ${data.email}
+Phone: ${data.phone}
+Children: ${data.children.length}
+Preferred Madrasahs: ${Array.isArray(data.preferredMadrasahs) ? data.preferredMadrasahs.join(', ') : data.preferredMadrasahs}
+
+Children Details:
+${data.children.map(child => `- ${child.name} (Age: ${child.age}, School Year: ${child.schoolYear})`).join('\n')}
+
+Please review in the admin dashboard.
+
+View Application: [Link to your admin interface]
+  `;
+
+  MailApp.sendEmail(CONFIG.ADMIN_EMAIL, subject, body);
+}
+
+/**
+ * Initialize mosque directory sheet with sample data
+ */
+function initializeMosqueDirectory() {
+  try {
+    const spreadsheet = SpreadsheetApp.openById(CONFIG.MOSQUE_SPREADSHEET_ID);
+    let sheet = spreadsheet.getSheetByName(CONFIG.MOSQUE_SHEET_NAME);
+
+    if (!sheet) {
+      sheet = spreadsheet.insertSheet(CONFIG.MOSQUE_SHEET_NAME);
+    }
+
+    // Clear existing data
+    sheet.clear();
+
+    // Set headers
+    const headers = [
+      'Name', 'Type', 'Address', 'City', 'Phone', 'Email', 'Website',
+      'Services', 'Imam', 'Established', 'Capacity'
+    ];
+
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
+
+    // Add sample data
+    const sampleData = [
+      ['Al-Noor Islamic Center', 'Mosque', '123 Main Street', 'London', '020-1234-5678', 'info@alnoor.org', 'www.alnoor.org', 'Daily prayers, Friday prayers, Islamic education, Community events', 'Imam Abdullah', '1995', '500'],
+      ['Baitul Mukarram Mosque', 'Mosque', '456 Oak Avenue', 'Birmingham', '0121-234-5678', 'contact@baitulmukarram.org', 'www.baitulmukarram.org', 'Daily prayers, Friday prayers, Quran classes, Youth programs', 'Imam Muhammad', '1988', '300'],
+      ['Green Lane Masjid', 'Mosque', '789 Green Lane', 'Birmingham', '0121-345-6789', 'admin@greenlane.org', 'www.greenlane.org', 'Daily prayers, Islamic school, Community center, Halal food bank', 'Imam Yusuf', '1979', '800'],
+      ['East London Mosque', 'Mosque', '82-92 Whitechapel Road', 'London', '020-7650-3000', 'info@eastlondonmosque.org.uk', 'www.eastlondonmosque.org.uk', 'Daily prayers, Education center, Community services, Interfaith dialogue', 'Imam Hassan', '1985', '1500'],
+      ['Manchester Islamic Centre', 'Islamic Centre', '335 Dickenson Road', 'Manchester', '0161-248-4248', 'info@mic-uk.org', 'www.mic-uk.org', 'Daily prayers, Educational programs, Social services, Cultural events', 'Imam Omar', '1967', '600']
+    ];
+
+    sheet.getRange(2, 1, sampleData.length, headers.length).setValues(sampleData);
+
+    console.log('Mosque directory initialized successfully');
+
+  } catch (error) {
+    console.error('Error initializing mosque directory:', error);
+  }
+}
+
+/**
+ * Test functions for development
+ */
+function testWaitlistSubmission() {
   const testData = {
-    parentFirstName: 'John',
-    parentLastName: 'Doe',
-    email: 'john.doe@example.com',
-    phone: '416-555-0123',
-    address: '123 Main St, Toronto, ON',
-    selectedMadrasahs: '["Al-Noor Islamic Academy", "Darul Uloom Institute"]',
-    additionalInfo: 'Test submission',
-    dataConsent: 'true',
-    children: '[{"firstName":"Ahmed","lastName":"Doe","age":"8","schoolYear":"Grade 3","notes":"Loves reading"}]'
+    action: 'submitWaitlist',
+    parentName: 'Test Parent',
+    email: 'test@example.com',
+    phone: '1234567890',
+    address: '123 Test Street',
+    emergencyContact: 'Emergency Contact',
+    emergencyPhone: '0987654321',
+    preferredMadrasahs: ['Al-Noor Islamic Center', 'Baitul Mukarram Mosque'],
+    children: [
+      { name: 'Child 1', age: '8', schoolYear: 'year3', notes: 'Loves reading' },
+      { name: 'Child 2', age: '10', schoolYear: 'year5', notes: '' }
+    ],
+    specialRequirements: 'No special requirements',
+    dataConsent: true
   };
-  
-  const result = processFormData(testData);
-  console.log('Test result:', result);
-  
-  return result;
+
+  const result = submitWaitlistForm(testData);
+  console.log('Test result:', result.getContent());
+}
+
+function testMosqueDirectory() {
+  const mockEvent = {
+    parameter: {
+      action: 'getMosques',
+      search: '',
+      type: 'all',
+      city: 'all'
+    }
+  };
+
+  const result = getMosqueDirectory(mockEvent);
+  console.log('Mosque directory test:', result.getContent());
 }
