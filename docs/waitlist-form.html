@@ -648,6 +648,11 @@
                     })
                 });
 
+                // Check if response is ok
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
                 const result = await response.json();
 
                 if (result.success) {
@@ -663,7 +668,17 @@
 
             } catch (error) {
                 console.error('Submission error:', error);
-                showError('Network error. Please check your connection and try again.');
+                
+                // Handle specific CORS errors
+                if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                    showError('CORS Error: Unable to connect to the server. Please ensure the Google Apps Script is deployed with proper CORS headers, or try refreshing the page and submitting again.');
+                } else if (error.message.includes('CORS')) {
+                    showError('Cross-origin request blocked. Please contact the administrator to fix the CORS configuration.');
+                } else if (error.message.includes('HTTP error')) {
+                    showError(`Server error (${error.message}). Please try again later or contact support.`);
+                } else {
+                    showError('Network error. Please check your internet connection and try again. If the problem persists, please contact support.');
+                }
             } finally {
                 document.getElementById('loadingIndicator').style.display = 'none';
                 document.getElementById('submitBtn').disabled = false;
