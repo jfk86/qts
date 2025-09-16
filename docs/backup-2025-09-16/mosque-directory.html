@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyMaktab - Mosque Directory</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; padding: 20px;
+        }
+        .container {
+            max-width: 1200px; margin: 0 auto; background: white;
+            border-radius: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white; padding: 30px; text-align: center;
+        }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; font-weight: 300; }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+        .search-container {
+            padding: 30px; background: #f8f9ff; border-bottom: 1px solid #e1e8ed;
+        }
+        .search-box {
+            display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;
+        }
+        .search-input {
+            flex: 1; min-width: 250px; padding: 12px 15px;
+            border: 2px solid #e1e8ed; border-radius: 8px;
+            font-size: 16px; background: white;
+        }
+        .filter-select {
+            padding: 12px 15px; border: 2px solid #e1e8ed; border-radius: 8px;
+            font-size: 16px; background: white; min-width: 150px;
+        }
+        .search-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; border: none; padding: 12px 25px; border-radius: 8px;
+            font-size: 16px; cursor: pointer; transition: all 0.3s ease;
+        }
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        .results-container { padding: 30px; }
+        .results-header { margin-bottom: 25px; color: #2c3e50; }
+        .mosque-card {
+            background: white; border: 1px solid #e1e8ed; border-radius: 10px;
+            padding: 25px; margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        .mosque-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .mosque-name {
+            font-size: 1.4em; font-weight: 600; color: #2c3e50; margin-bottom: 10px;
+        }
+        .mosque-type {
+            display: inline-block; background: #667eea; color: white;
+            padding: 4px 12px; border-radius: 15px; font-size: 0.8em;
+            margin-bottom: 15px;
+        }
+        .mosque-info {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px; margin-bottom: 15px;
+        }
+        .info-item {
+            display: flex; align-items: center; gap: 8px; color: #555;
+        }
+        .info-icon { width: 16px; height: 16px; color: #667eea; }
+        .services-list { margin-top: 15px; }
+        .services-title {
+            font-weight: 600; color: #2c3e50; margin-bottom: 8px;
+        }
+        .services-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+        .service-tag {
+            background: #f1f3f4; color: #555; padding: 4px 10px;
+            border-radius: 12px; font-size: 0.85em;
+        }
+        .back-link {
+            display: inline-block; margin: 20px 30px; color: #667eea;
+            text-decoration: none; font-weight: 600; transition: color 0.3s ease;
+        }
+        .back-link:hover { color: #764ba2; }
+        .loading { text-align: center; padding: 40px; color: #666; }
+        .no-results { text-align: center; padding: 40px; color: #666; }
+        .data-source-info {
+            background: #e8f4fd; border: 1px solid #bee5eb; border-radius: 8px;
+            padding: 15px; margin-bottom: 20px; font-size: 0.9em; color: #0c5460;
+        }
+        .data-source-info strong { color: #0a4c57; }
+        @media (max-width: 768px) {
+            .search-box { flex-direction: column; }
+            .search-input, .filter-select { min-width: 100%; }
+            .mosque-info { grid-template-columns: 1fr; }
+            .container { margin: 10px; border-radius: 10px; }
+            .header { padding: 20px; }
+            .header h1 { font-size: 2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🕌 Mosque Directory</h1>
+            <p>Find mosques and Islamic centers in your area</p>
+        </div>
+        <div class="search-container">
+            <div class="data-source-info">
+                <strong>📊 Dynamic Data:</strong> This directory is powered by Google Sheets. 
+                Data updates automatically when the backend spreadsheet is modified.
+                <a href="https://docs.google.com/spreadsheets/d/1z1sVMI9kR4HS4va3filYdEWbjVS881nLx26qpE3YFu8/edit" target="_blank" style="color: #0c5460; text-decoration: underline;">View/Edit Data</a>
+            </div>
+            <div class="search-box">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search by name, location, or services...">
+                <select id="typeFilter" class="filter-select">
+                    <option value="">All Types</option>
+                    <option value="Mosque">Mosque</option>
+                    <option value="Islamic Center">Islamic Center</option>
+                    <option value="Masjid">Masjid</option>
+                </select>
+                <select id="cityFilter" class="filter-select">
+                    <option value="">All Cities</option>
+                </select>
+                <button onclick="searchMosques()" class="search-btn">Search</button>
+            </div>
+        </div>
+        <div class="results-container">
+            <div id="resultsHeader" class="results-header">
+                <h3>Loading mosque directory...</h3>
+            </div>
+            <div id="resultsContainer">
+                <div class="loading">
+                    <p>Loading mosque data from Google Sheets...</p>
+                </div>
+            </div>
+        </div>
+        <div style="margin: 20px 30px; text-align: center;">
+            <a href="waitlist-form.html" class="back-link">← Back to Waitlist Registration</a>
+            <span style="margin: 0 15px; color: #ccc;">|</span>
+            <a href="navigation.html" class="back-link">🏠 MyMaktab Home</a>
+            <span style="margin: 0 15px; color: #ccc;">|</span>
+            <a href="index.html" class="back-link">📖 Access QTS System</a>
+        </div>
+    </div>
+    <script>
+        let mosqueData = [];
+        
+        // Google Sheets Configuration
+        const SHEET_CONFIG = {
+            sheetId: '1z1sVMI9kR4HS4va3filYdEWbjVS881nLx26qpE3YFu8',
+            range: 'Mosques!A2:K1000'
+        };
+
+        // Fallback data in case Google Sheets is not accessible
+        const fallbackMosqueData = [
+            {
+                name: "Al-Noor Islamic Center", type: "Islamic Center",
+                address: "123 Main Street, Toronto, ON M5V 3A8", city: "Toronto",
+                phone: "(416) 555-0123", email: "info@alnoor.ca", website: "www.alnoor.ca",
+                services: ["Daily Prayers", "Friday Prayers", "Islamic School", "Community Events", "Marriage Services"],
+                imam: "Imam Abdullah Rahman", established: "1995", capacity: "500"
+            },
+            {
+                name: "Masjid Al-Furqan", type: "Mosque",
+                address: "456 Oak Avenue, Mississauga, ON L5B 2H3", city: "Mississauga",
+                phone: "(905) 555-0456", email: "contact@alfurqan.org", website: "www.alfurqan.org",
+                services: ["Daily Prayers", "Friday Prayers", "Quran Classes", "Youth Programs", "Women's Programs"],
+                imam: "Imam Muhammad Hassan", established: "2001", capacity: "300"
+            },
+            {
+                name: "Islamic Society of Markham", type: "Islamic Center",
+                address: "789 Elm Street, Markham, ON L3R 5G4", city: "Markham",
+                phone: "(905) 555-0789", email: "info@islamicmarkham.ca", website: "www.islamicmarkham.ca",
+                services: ["Daily Prayers", "Friday Prayers", "Islamic School", "Funeral Services", "Counseling"],
+                imam: "Imam Omar Al-Zahra", established: "1988", capacity: "400"
+            },
+            {
+                name: "Baitul Islam Mosque", type: "Mosque",
+                address: "321 Pine Road, Brampton, ON L6Y 4R2", city: "Brampton",
+                phone: "(905) 555-0321", email: "admin@baitulislam.ca", website: "www.baitulislam.ca",
+                services: ["Daily Prayers", "Friday Prayers", "Hifz Program", "Arabic Classes", "Community Kitchen"],
+                imam: "Imam Yusuf Ahmed", established: "2003", capacity: "250"
+            },
+            {
+                name: "Masjid Darul Uloom", type: "Mosque",
+                address: "654 Cedar Lane, Richmond Hill, ON L4C 9K1", city: "Richmond Hill",
+                phone: "(905) 555-0654", email: "info@darululoom.ca", website: "www.darululoom.ca",
+                services: ["Daily Prayers", "Friday Prayers", "Islamic Studies", "Tafseer Classes", "Library"],
+                imam: "Imam Abdul Malik", established: "1992", capacity: "350"
+            },
+            {
+                name: "Al-Hijra Islamic Center", type: "Islamic Center",
+                address: "987 Maple Drive, Vaughan, ON L4K 2M8", city: "Vaughan",
+                phone: "(905) 555-0987", email: "contact@alhijra.org", website: "www.alhijra.org",
+                services: ["Daily Prayers", "Friday Prayers", "Dawah Programs", "Interfaith Dialogue", "Social Services"],
+                imam: "Imam Tariq Mahmood", established: "1999", capacity: "450"
+            },
+            {
+                name: "Masjid Al-Taqwa", type: "Mosque",
+                address: "147 Birch Street, Scarborough, ON M1P 4Y7", city: "Scarborough",
+                phone: "(416) 555-0147", email: "info@altaqwa.ca", website: "www.altaqwa.ca",
+                services: ["Daily Prayers", "Friday Prayers", "Quran Memorization", "Islamic History", "Charity Programs"],
+                imam: "Imam Bilal Ibrahim", established: "1985", capacity: "200"
+            },
+            {
+                name: "Islamic Foundation of Toronto", type: "Islamic Center",
+                address: "258 Willow Avenue, North York, ON M2N 6S4", city: "North York",
+                phone: "(416) 555-0258", email: "admin@iftoronto.org", website: "www.iftoronto.org",
+                services: ["Daily Prayers", "Friday Prayers", "Educational Programs", "Health Services", "Senior Programs"],
+                imam: "Imam Rashid Ali", established: "1978", capacity: "600"
+            },
+            {
+                name: "Masjid Ar-Rahman", type: "Mosque",
+                address: "369 Spruce Court, Etobicoke, ON M9W 3L5", city: "Etobicoke",
+                phone: "(416) 555-0369", email: "contact@arrahman.ca", website: "www.arrahman.ca",
+                services: ["Daily Prayers", "Friday Prayers", "Children's Programs", "Marriage Counseling", "Food Bank"],
+                imam: "Imam Saeed Hassan", established: "1994", capacity: "280"
+            },
+            {
+                name: "Al-Madina Islamic Center", type: "Islamic Center",
+                address: "741 Poplar Street, Ajax, ON L1S 2H9", city: "Ajax",
+                phone: "(905) 555-0741", email: "info@almadina.org", website: "www.almadina.org",
+                services: ["Daily Prayers", "Friday Prayers", "Weekend School", "Sports Programs", "Cultural Events"],
+                imam: "Imam Khalid Noor", established: "2005", capacity: "320"
+            }
+        ];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMosqueData();
+        });
+
+        async function loadMosqueData() {
+            try {
+                // Try to load from Google Sheets using public CSV export
+                const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_CONFIG.sheetId}/export?format=csv&gid=1035398978`;
+                const response = await fetch(csvUrl);
+                
+                if (response.ok) {
+                    const csvText = await response.text();
+                    mosqueData = parseCSVData(csvText);
+                    console.log('✅ Successfully loaded mosque data from Google Sheets');
+                } else {
+                    throw new Error('Failed to load from Google Sheets');
+                }
+            } catch (error) {
+                console.log('⚠️ Using fallback data:', error.message);
+                mosqueData = fallbackMosqueData;
+            }
+            
+            populateCityFilter();
+            displayMosques(mosqueData);
+            updateResultsHeader(mosqueData.length);
+        }
+
+        function parseCSVData(csvText) {
+            const lines = csvText.split('\n');
+            const data = [];
+            
+            // Skip header row (index 0)
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                
+                const columns = parseCSVLine(line);
+                if (columns.length >= 11 && columns[0]) {
+                    data.push({
+                        name: columns[0] || '',
+                        type: columns[1] || '',
+                        address: columns[2] || '',
+                        city: columns[3] || '',
+                        phone: columns[4] || '',
+                        email: columns[5] || '',
+                        website: columns[6] || '',
+                        services: columns[7] ? columns[7].split(',').map(s => s.trim()) : [],
+                        imam: columns[8] || '',
+                        established: columns[9] || '',
+                        capacity: columns[10] || ''
+                    });
+                }
+            }
+            
+            return data;
+        }
+
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            
+            result.push(current.trim());
+            return result;
+        }
+
+        function populateCityFilter() {
+            const cities = [...new Set(mosqueData.map(mosque => mosque.city))].sort();
+            const cityFilter = document.getElementById('cityFilter');
+            
+            // Clear existing options except the first one
+            cityFilter.innerHTML = '<option value="">All Cities</option>';
+            
+            cities.forEach(city => {
+                if (city) {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    cityFilter.appendChild(option);
+                }
+            });
+        }
+
+        function searchMosques() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const typeFilter = document.getElementById('typeFilter').value;
+            const cityFilter = document.getElementById('cityFilter').value;
+            
+            let filteredMosques = mosqueData.filter(mosque => {
+                const matchesSearch = !searchTerm || 
+                    mosque.name.toLowerCase().includes(searchTerm) ||
+                    mosque.address.toLowerCase().includes(searchTerm) ||
+                    mosque.services.some(service => service.toLowerCase().includes(searchTerm));
+                
+                const matchesType = !typeFilter || mosque.type === typeFilter;
+                const matchesCity = !cityFilter || mosque.city === cityFilter;
+                
+                return matchesSearch && matchesType && matchesCity;
+            });
+            
+            displayMosques(filteredMosques);
+            updateResultsHeader(filteredMosques.length);
+        }
+
+        function displayMosques(mosques) {
+            const container = document.getElementById('resultsContainer');
+            
+            if (mosques.length === 0) {
+                container.innerHTML = '<div class="no-results"><p>No mosques found matching your criteria.</p></div>';
+                return;
+            }
+            
+            container.innerHTML = mosques.map(mosque => `
+                <div class="mosque-card">
+                    <div class="mosque-name">${mosque.name}</div>
+                    <div class="mosque-type">${mosque.type}</div>
+                    <div class="mosque-info">
+                        <div class="info-item">
+                            <span class="info-icon">📍</span>
+                            <span>${mosque.address}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-icon">📞</span>
+                            <span>${mosque.phone}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-icon">✉️</span>
+                            <span>${mosque.email}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-icon">🌐</span>
+                            <span>${mosque.website}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-icon">👨‍🏫</span>
+                            <span>${mosque.imam}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-icon">📅</span>
+                            <span>Est. ${mosque.established}</span>
+                        </div>
+                    </div>
+                    <div class="services-list">
+                        <div class="services-title">Services & Programs:</div>
+                        <div class="services-tags">
+                            ${mosque.services.map(service => `<span class="service-tag">${service}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateResultsHeader(count) {
+            const header = document.getElementById('resultsHeader');
+            header.innerHTML = `<h3>Found ${count} mosque${count !== 1 ? 's' : ''}</h3>`;
+        }
+
+        // Search on Enter key
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchMosques();
+            }
+        });
+    </script>
+</body>
+</html>
